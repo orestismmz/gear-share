@@ -3,9 +3,9 @@
 import { useTransition } from 'react'
 
 interface DeleteButtonProps {
-  userId: number
+  userId: string
   userName: string
-  deleteUser: (userId: number) => Promise<void>
+  deleteUser: (userId: string) => Promise<void>
 }
 
 export default function DeleteButton({ userId, userName, deleteUser }: DeleteButtonProps) {

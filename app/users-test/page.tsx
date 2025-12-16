@@ -1,16 +1,14 @@
-import { createClient } from '@/app/utils/supabase/server'
-import { cookies } from 'next/headers'
+import { createClient } from '@/app/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import DeleteButton from './delete-button'
 
-async function deleteUser(userId: number) {
+async function deleteUser(userId: string) {
   'use server'
   
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await createClient()
   
   const { error } = await supabase
-    .from('users')
+    .from('profiles')
     .delete()
     .eq('id', userId)
   
@@ -23,12 +21,11 @@ async function deleteUser(userId: number) {
 }
 
 export default async function UsersTestPage() {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const supabase = await createClient()
 
   const { data: users, error } = await supabase
-    .from('users')
-    .select('id, created_at, firstname, lastname, email, is_verified')
+    .from('profiles')
+    .select('id, created_at, firstname, lastname, username, is_verified')
 
   if (error) {
     return (
@@ -59,7 +56,7 @@ export default async function UsersTestPage() {
                   <th className="border px-4 py-2 text-left">ID</th>
                   <th className="border px-4 py-2 text-left">First Name</th>
                   <th className="border px-4 py-2 text-left">Last Name</th>
-                  <th className="border px-4 py-2 text-left">Email</th>
+                  <th className="border px-4 py-2 text-left">Username</th>
                   <th className="border px-4 py-2 text-left">Verified</th>
                   <th className="border px-4 py-2 text-left">Created At</th>
                   <th className="border px-4 py-2 text-left">Actions</th>
@@ -68,10 +65,10 @@ export default async function UsersTestPage() {
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id}>
-                    <td className="border px-4 py-2">{user.id}</td>
+                    <td className="border px-4 py-2 text-xs font-mono">{user.id.substring(0, 8)}...</td>
                     <td className="border px-4 py-2">{user.firstname || '-'}</td>
                     <td className="border px-4 py-2">{user.lastname || '-'}</td>
-                    <td className="border px-4 py-2">{user.email || '-'}</td>
+                    <td className="border px-4 py-2">{user.username || '-'}</td>
                     <td className="border px-4 py-2">
                       {user.is_verified ? '✓' : '✗'}
                     </td>
@@ -84,7 +81,7 @@ export default async function UsersTestPage() {
                     <td className="border px-4 py-2">
                       <DeleteButton
                         userId={user.id}
-                        userName={user.firstname || user.email || 'this user'}
+                        userName={user.firstname || user.username || 'this user'}
                         deleteUser={deleteUser}
                       />
                     </td>

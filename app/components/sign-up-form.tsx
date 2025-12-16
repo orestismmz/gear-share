@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Button from "./ui/button";
-import { createClient } from "@/app/utils/supabase/client";
+import { createClient } from "@/app/lib/supabase/client";
 
 export default function SignUpForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -49,24 +51,59 @@ export default function SignUpForm() {
       // Create Supabase client
       const supabase = createClient();
 
-      // Insert user into users table
-      const { error: insertError } = await supabase
-        .from("users")
+      // Pre-check: Verify username is available before creating auth user
+      const { data: existingUsername } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", formData.username.trim())
+        .maybeSingle();
+
+      if (existingUsername) {
+        setError("This username is already taken. Please choose another.");
+        return;
+      }
+
+      // Step 1: Sign up the user with Supabase Auth
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      if (signUpError) {
+        if (signUpError.message.includes("already registered")) {
+          setError("This email is already registered. Please sign in instead.");
+        } else {
+          setError(signUpError.message || "Failed to create account. Please try again.");
+        }
+        return;
+      }
+
+      if (!authData.user) {
+        setError("Failed to create account. Please try again.");
+        return;
+      }
+
+      // Step 2: Create profile in profiles table
+      const { error: profileError } = await supabase
+        .from("profiles")
         .insert({
+          id: authData.user.id,
           firstname: formData.firstname.trim(),
           lastname: formData.lastname.trim(),
           username: formData.username.trim(),
-          email: formData.email.trim(),
           is_verified: false,
         });
 
-      if (insertError) {
-        // Handle specific Supabase errors
-        if (insertError.code === "23505") {
-          // Unique constraint violation (email already exists)
-          setError("This email is already registered. Please use a different email.");
+      if (profileError) {
+        // Handle profile creation errors
+        if (profileError.code === "23505") {
+          if (profileError.message.includes("username")) {
+            setError("This username is already taken. Please choose another.");
+          } else {
+            setError("Failed to create profile. Please try again.");
+          }
         } else {
-          setError(insertError.message || "Failed to create account. Please try again.");
+          setError(profileError.message || "Failed to create profile. Please try again.");
         }
         return;
       }
@@ -81,7 +118,8 @@ export default function SignUpForm() {
         confirmPassword: "",
       });
 
-      alert(`Sign up successful! Welcome, ${formData.firstname}!`);
+      // Navigate to sign-in page
+      router.push("/signin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
     } finally {
