@@ -1,5 +1,6 @@
 import { createClient } from '@/app/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import LogoutButton from '@/app/components/auth/LogoutButton'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -9,7 +10,7 @@ export default async function ProfilePage() {
 
   if (authError || !user) {
     // Redirect to sign-in if not authenticated
-    redirect('/signin')
+    redirect('/sign-in')
   }
 
   // Fetch the user's profile
@@ -32,7 +33,10 @@ export default async function ProfilePage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Profile</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">Profile</h1>
+        <LogoutButton />
+      </div>
       <p className="text-lg">Hello {profile.username}</p>
     </div>
   )

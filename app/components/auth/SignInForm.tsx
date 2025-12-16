@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "./ui/button";
+import Link from "next/link";
+import Button from "../ui/Button";
 import { createClient } from "@/app/lib/supabase/client";
 
 export default function SignInForm() {
@@ -119,6 +120,13 @@ export default function SignInForm() {
       >
         {isLoading ? "Signing in..." : "Sign In"}
       </Button>
+
+      <p className="text-center text-sm text-grey-dark">
+        or{" "}
+        <Link href="/sign-up" className="text-primary hover:underline font-medium">
+          Sign up if you don't have an account yet
+        </Link>
+      </p>
     </form>
   );
 }

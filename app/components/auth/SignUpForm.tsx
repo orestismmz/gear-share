@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "./ui/button";
+import Link from "next/link";
+import Button from "../ui/Button";
 import { createClient } from "@/app/lib/supabase/client";
 
 export default function SignUpForm() {
@@ -119,7 +120,7 @@ export default function SignUpForm() {
       });
 
       // Navigate to sign-in page
-      router.push("/signin");
+      router.push("/sign-in");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
     } finally {
@@ -242,6 +243,13 @@ export default function SignUpForm() {
       >
         {isLoading ? "Signing up..." : "Sign Up"}
       </Button>
+
+      <p className="text-center text-sm text-grey-dark">
+        or{" "}
+        <Link href="/sign-in" className="text-primary hover:underline font-medium">
+          Sign in if you already have an account
+        </Link>
+      </p>
     </form>
   );
 }

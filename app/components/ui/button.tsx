@@ -16,7 +16,7 @@ export default function Button({
   const baseStyles = "font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
   
   const variantStyles = {
-    primary: "bg-primary text-grey-dark hover:bg-primary/90 focus:ring-primary",
+    primary: "bg-primary text-white hover:bg-primary/90 focus:ring-primary",
     secondary: "bg-secondary text-white hover:bg-secondary/90 focus:ring-secondary",
     outline: "border-2 border-primary text-primary hover:bg-primary hover:text-grey-dark focus:ring-primary",
   };
