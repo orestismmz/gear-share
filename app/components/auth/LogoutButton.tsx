@@ -21,7 +21,6 @@ export default function LogoutButton() {
 
   return (
     <Button
-      variant="secondary"
       size="md"
       onClick={handleLogout}
       disabled={isLoading}

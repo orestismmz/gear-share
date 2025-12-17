@@ -1,6 +1,8 @@
 import { createClient } from '@/app/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import LogoutButton from '@/app/components/auth/LogoutButton'
+import Button from '@/app/components/ui/Button'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -35,9 +37,14 @@ export default async function ProfilePage() {
     <div className="p-4">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Profile</h1>
+        <div className="flex gap-2">
+        <Link href="/create-listing">
+          <Button>Create Listing</Button>
+        </Link>
         <LogoutButton />
+        </div>
       </div>
-      <p className="text-lg">Hello {profile.username}</p>
+      <p className="text-lg mb-6">Hello {profile.username}</p>
     </div>
   )
 }

@@ -5,8 +5,8 @@
   --background:#f5f9fa;
   --white: #f5f9fa;
   --grey-dark: #5d5a58;
-  --primary: #2bd4c0;
-  --secondary: #179b8c;
+  --primary:   #179b8c;
+  --secondary: #2bd4c0;
 }
 
 @theme inline {

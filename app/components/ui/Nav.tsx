@@ -6,10 +6,12 @@ export default function Nav() {
     <nav>
       <Link 
         href="/profile" 
-        className="inline-flex items-center gap-2 text-primary hover:opacity-80 transition-opacity"
+        className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
         aria-label="Profile"
       >
-        <User size={24} />
+        <div className="rounded-full border-2 border-secondary p-2">
+          <User size={24} className="text-primary" />
+        </div>
       </Link>
     </nav>
   );
