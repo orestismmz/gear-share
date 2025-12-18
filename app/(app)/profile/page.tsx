@@ -80,7 +80,7 @@ export default async function ProfilePage() {
         <h2 className="text-2xl font-semibold ">Your Listings</h2>
 
         {listings.length === 0 ? (
-          <p className="text-gray-600 text-center py-12">
+          <p className="text-gray-600 text-left">
             You haven't posted any listings yet. Create your first listing to
             get started!
           </p>
@@ -103,7 +103,7 @@ export default async function ProfilePage() {
         <h2 className=" text-2xl font-semibold">Your Bookings</h2>
 
         {bookings.length === 0 ? (
-          <p className="text-gray-600 text-center py-12">
+          <p className="text-gray-600 text-left">
             You haven't made any bookings yet.
           </p>
         ) : (

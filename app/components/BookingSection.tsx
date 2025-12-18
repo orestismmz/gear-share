@@ -5,7 +5,7 @@ import { DateRange } from "react-day-picker";
 import DateRangePicker from "./ui/DateRangePicker";
 import Button from "./ui/Button";
 import { createBooking, getBookingsByListingId } from "@/app/actions/bookings";
-import { eachDayOfInterval, parseISO } from "date-fns";
+import { eachDayOfInterval, parseISO, format } from "date-fns";
 
 interface BookingSectionProps {
   listingId: string;
@@ -63,8 +63,8 @@ export default function BookingSection({ listingId }: BookingSectionProps) {
 
     const result = await createBooking({
       listing_id: listingId,
-      start_date: selectedRange.from.toISOString().split("T")[0],
-      end_date: selectedRange.to.toISOString().split("T")[0],
+      start_date: format(selectedRange.from, "yyyy-MM-dd"),
+      end_date: format(selectedRange.to, "yyyy-MM-dd"),
     });
 
     setIsLoading(false);
