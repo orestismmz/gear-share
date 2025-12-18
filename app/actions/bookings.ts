@@ -18,6 +18,20 @@ export interface Booking {
   created_at: string;
 }
 
+export type BookingWithListingInfo = {
+  id: string;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+  listing: {
+    id: string;
+    title: string;
+    price_per_day: number;
+    location: string;
+    owner_id: string;
+  } | null;
+};
+
 export async function createBooking(input: CreateBookingInput) {
   const supabase = await createClient();
 
@@ -76,4 +90,52 @@ export async function getBookingsByListingId(
   }
 
   return data || [];
+}
+
+export async function getMyBookingsWithListingInfo(): Promise<
+  BookingWithListingInfo[]
+> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) return [];
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(
+      `
+      id,
+      start_date,
+      end_date,
+      created_at,
+      listing:listings!bookings_listing_id_fkey (
+        id,
+        title,
+        price_per_day,
+        location,
+        owner_id
+      )
+    `
+    )
+    .eq("borrower_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching bookings with listing info:", error);
+    return [];
+  }
+
+  // Transform the data to match our type
+  const bookingsWithListingInfo = (data ?? []).map((booking) => ({
+    ...booking,
+    listing: Array.isArray(booking.listing)
+      ? (booking.listing[0] ?? null)
+      : booking.listing,
+  }));
+
+  return bookingsWithListingInfo as BookingWithListingInfo[];
 }
