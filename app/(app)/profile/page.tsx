@@ -6,6 +6,7 @@ import Button from "@/app/components/ui/Button";
 import { getListingsByUsername } from "@/app/actions/listings";
 import { getMyBookingsWithListingInfo } from "@/app/actions/bookings";
 import ListingCard from "@/app/components/ui/ListingCard";
+import BookingCard from "@/app/components/ui/BookingCard";
 import { User } from "lucide-react";
 
 function capitalizeFirstLetter(str: string): string {
@@ -67,7 +68,7 @@ export default async function ProfilePage() {
           </div>
           <h1 className="text-3xl font-bold">{displayName}</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <Link href="/create-listing">
             <Button>Create Listing</Button>
           </Link>
@@ -108,20 +109,18 @@ export default async function ProfilePage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {bookings.map((b) => (
-              <div key={b.id} className="flex flex-col gap-2">
+              <div key={b.id}>
                 {b.listing ? (
-                  <ListingCard
-                    id={b.listing.id}
+                  <BookingCard
+                    listingId={b.listing.id}
                     title={b.listing.title}
-                    price_per_day={b.listing.price_per_day}
                     location={b.listing.location}
+                    startDate={b.start_date}
+                    endDate={b.end_date}
                   />
                 ) : (
                   <p>Listing deleted</p>
                 )}
-                <p className="text-gray-600 text-xs text-right">
-                  From {b.start_date} to {b.end_date}
-                </p>
               </div>
             ))}
           </div>
