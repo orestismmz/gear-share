@@ -33,6 +33,28 @@ export default async function ListingPage({ params }: ListingPageProps) {
 
         <div className="flex justify-between gap-6 mb-6">
           <div className="flex flex-col gap-10">
+            <div className="flex flex-col  gap-6 border-gray-200">
+              {listing.profiles && (
+                <Link href={`/public-profiles/${listing.profiles.username}`}>
+                  <div className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+                    <div className="rounded-full border-2 border-secondary p-1.5">
+                      <User size={20} className="text-primary" />
+                    </div>
+                    <span className="font-medium text-gray-600">
+                      {listing.profiles.username}
+                    </span>
+                  </div>
+                </Link>
+              )}
+              <div className="text-sm text-gray-500">
+                Listed on{" "}
+                {new Date(listing.created_at).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+            </div>
             <div>
               <h2 className="text-sm font-semibold text-gray-600 uppercase mb-2">
                 Price per day
@@ -49,12 +71,12 @@ export default async function ListingPage({ params }: ListingPageProps) {
               <p className="text-xl capitalize">{listing.location}</p>
             </div>
 
-            <div>
+            {/* <div>
               <h2 className="text-sm font-semibold text-gray-600 uppercase mb-2">
                 Category
               </h2>
               <p className="text-xl capitalize">{listing.category}</p>
-            </div>
+            </div> */}
 
             <div>
               <h2 className="text-sm font-semibold text-gray-600 uppercase mb-2">
@@ -66,29 +88,6 @@ export default async function ListingPage({ params }: ListingPageProps) {
             </div>
           </div>
           <BookingSection listingId={listing.id} />
-        </div>
-
-        <div className="flex flex-col gap-4 mt-8 pt-6 border-t border-gray-200">
-          {listing.profiles && (
-            <Link href={`/public-profiles/${listing.profiles.username}`}>
-              <div className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
-                <div className="rounded-full border-2 border-secondary p-1.5">
-                  <User size={20} className="text-primary" />
-                </div>
-                <span className="font-medium text-gray-600">
-                  {listing.profiles.username}
-                </span>
-              </div>
-            </Link>
-          )}
-          <div className="text-sm text-gray-500">
-            Listed on{" "}
-            {new Date(listing.created_at).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </div>
         </div>
       </div>
     </div>

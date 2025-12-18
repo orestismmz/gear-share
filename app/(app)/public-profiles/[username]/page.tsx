@@ -1,20 +1,36 @@
-import { getListingsByUsername } from '@/app/actions/listings'
-import ListingCard from '@/app/components/ui/ListingCard'
-import { notFound } from 'next/navigation'
-import { User } from 'lucide-react'
+import { getListingsByUsername } from "@/app/actions/listings";
+import { getProfileByUsername } from "@/app/actions/profiles";
+import ListingCard from "@/app/components/ui/ListingCard";
+import { notFound } from "next/navigation";
+import { User } from "lucide-react";
 
 interface PublicProfilePageProps {
   params: Promise<{
-    username: string
-  }>
+    username: string;
+  }>;
 }
 
-export default async function PublicProfilePage({ params }: PublicProfilePageProps) {
-  const { username } = await params
-  const listings = await getListingsByUsername(username)
+function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
 
-  // If no listings found, we might want to check if user exists
-  // For now, we'll show the page even with no listings
+export default async function PublicProfilePage({
+  params,
+}: PublicProfilePageProps) {
+  const { username } = await params;
+  const [profile, listings] = await Promise.all([
+    getProfileByUsername(username),
+    getListingsByUsername(username),
+  ]);
+
+  if (!profile) {
+    notFound();
+  }
+
+  const displayName =
+    profile.firstname && profile.lastname
+      ? `${capitalizeFirstLetter(profile.firstname)} ${capitalizeFirstLetter(profile.lastname)}`
+      : username;
 
   return (
     <div className="p-4">
@@ -23,7 +39,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           <div className="rounded-full border-2 border-secondary p-3">
             <User size={32} className="text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">{username}</h1>
+          <h1 className="text-3xl font-bold">{displayName}</h1>
         </div>
       </div>
 
@@ -47,6 +63,5 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
         </div>
       )}
     </div>
-  )
+  );
 }
-
