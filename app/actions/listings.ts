@@ -4,16 +4,16 @@ import { createClient } from "@/app/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export interface CreateListingInput {
+export type CreateListingInput = {
   title: string;
   description?: string;
   price_per_day: number;
   condition: "new" | "like_new" | "good" | "fair" | "poor";
   location: "amagerbro" | "østerbro" | "nørrebro" | "vesterbro";
   category: "diy" | "sports" | "outdoor" | "photography" | "music";
-}
+};
 
-export interface Listing {
+export type Listing = {
   id: string;
   owner_id: string;
   title: string;
@@ -26,7 +26,7 @@ export interface Listing {
   profiles?: {
     username: string;
   };
-}
+};
 
 export async function createListing(input: CreateListingInput) {
   const supabase = await createClient();

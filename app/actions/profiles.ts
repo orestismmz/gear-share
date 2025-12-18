@@ -2,12 +2,12 @@
 
 import { createClient } from "@/app/lib/supabase/server";
 
-export interface Profile {
+export type Profile = {
   id: string;
   username: string;
   firstname: string | null;
   lastname: string | null;
-}
+};
 
 export async function getProfileByUsername(
   username: string

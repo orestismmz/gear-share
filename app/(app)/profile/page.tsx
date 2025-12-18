@@ -112,6 +112,7 @@ export default async function ProfilePage() {
               <div key={b.id}>
                 {b.listing ? (
                   <BookingCard
+                    bookingId={b.id}
                     listingId={b.listing.id}
                     title={b.listing.title}
                     location={b.listing.location}
