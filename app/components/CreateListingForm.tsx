@@ -101,7 +101,7 @@ export default function CreateListingForm() {
           <option value="">Select a category</option>
           <option value="diy">DIY</option>
           <option value="sports">Sports</option>
-          <option value="camping">Camping</option>
+          <option value="outdoor">Outdoor</option>
           <option value="photography">Photography</option>
           <option value="music">Music</option>
         </select>

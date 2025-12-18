@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-day-picker/style.css";
 
 :root {
 
@@ -29,4 +30,17 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
+}
+
+/* React Day Picker Custom Styles */
+.rdp-root {
+  --rdp-accent-color: #179b8c;
+  --rdp-accent-background-color: #f0f9f8;
+  --rdp-today-color: #179b8c;
+  --rdp-range_middle-background-color: rgba(23, 155, 140, 0.15);
+  --rdp-range_middle-color: #179b8c;
+  --rdp-range_start-background: #179b8c;
+  --rdp-range_start-color: white;
+  --rdp-range_end-background: #179b8c;
+  --rdp-range_end-color: white;
 }
