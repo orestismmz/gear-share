@@ -4,7 +4,10 @@ import Link from "next/link";
 import LogoutButton from "@/app/components/auth/LogoutButton";
 import Button from "@/app/components/ui/Button";
 import { getListingsByUsername } from "@/app/actions/listings";
-import { getMyBookingsWithListingInfo } from "@/app/actions/bookings";
+import {
+  getMyBookingsWithListingInfo,
+  getBookingsOnMyListings,
+} from "@/app/actions/bookings";
 import ListingCard from "@/app/components/ui/ListingCard";
 import BookingCard from "@/app/components/ui/BookingCard";
 import { User } from "lucide-react";
@@ -51,8 +54,11 @@ export default async function ProfilePage() {
   // Fetch the user's listings
   const listings = await getListingsByUsername(profile.username);
 
-  // Fetch the user's bookings with listing details
+  // Fetch the user's bookings with listing details (as borrower)
   const bookings = await getMyBookingsWithListingInfo();
+
+  // Fetch bookings on the user's listings (as owner)
+  const bookingsOnMyListings = await getBookingsOnMyListings();
 
   const displayName =
     profile.firstname && profile.lastname
@@ -101,6 +107,37 @@ export default async function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-6">
+        <h2 className="text-2xl font-semibold">Bookings on Your Listings</h2>
+
+        {bookingsOnMyListings.length === 0 ? (
+          <p className="text-gray-600 text-left">
+            No bookings have been made on your listings yet.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {bookingsOnMyListings.map((b) => (
+              <div key={b.id}>
+                {b.listing ? (
+                  <BookingCard
+                    bookingId={b.id}
+                    listingId={b.listing.id}
+                    title={b.listing.title}
+                    location={b.listing.location}
+                    startDate={b.start_date}
+                    endDate={b.end_date}
+                    imageUrl={b.listing.image_url}
+                    status={b.status}
+                  />
+                ) : (
+                  <p>Listing deleted</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-6">
         <h2 className=" text-2xl font-semibold">Your Bookings</h2>
 
         {bookings.length === 0 ? (
@@ -120,6 +157,7 @@ export default async function ProfilePage() {
                     startDate={b.start_date}
                     endDate={b.end_date}
                     imageUrl={b.listing.image_url}
+                    status={b.status}
                   />
                 ) : (
                   <p>Listing deleted</p>

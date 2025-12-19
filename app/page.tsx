@@ -12,7 +12,7 @@ export default async function Home() {
         <Logo />
         <Nav />
       </header>
-      <main>
+      <main className="pt-10">
         <h1 className="text-4xl font-bold mb-8">Browse Gear</h1>
 
         {listings.length === 0 ? (
