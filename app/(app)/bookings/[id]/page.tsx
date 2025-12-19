@@ -1,7 +1,8 @@
 import { getBookingById } from "@/app/actions/bookings";
 import { redirect } from "next/navigation";
-import { MapPin, User } from "lucide-react";
+import { MapPin, User, ImageIcon } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -41,6 +42,19 @@ export default async function BookingDetailPage({
       </div>
 
       <div className="mb-8 p-6 flex flex-col gap-10 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="relative w-full h-64 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+          {booking.listing.image_url ? (
+            <Image
+              src={booking.listing.image_url}
+              alt={booking.listing.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <ImageIcon size={96} className="text-gray-400" />
+          )}
+        </div>
+
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-bold text-gray-900">
             {booking.listing.title}

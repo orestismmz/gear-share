@@ -42,6 +42,7 @@ export type BookingWithListingInfo = {
     price_per_day: number;
     location: string;
     owner_id: string;
+    image_url: string | null;
   } | null;
 };
 
@@ -59,6 +60,7 @@ export type BookingWithListingAndProfileInfo = {
     price_per_day: number;
     location: string;
     owner_id: string;
+    image_url: string | null;
     owner_profile: {
       firstname: string;
       lastname: string;
@@ -177,7 +179,8 @@ export async function getMyBookingsWithListingInfo(): Promise<
         title,
         price_per_day,
         location,
-        owner_id
+        owner_id,
+        image_url
       )
     `
     )
@@ -229,6 +232,7 @@ export async function getBookingById(
         price_per_day,
         location,
         owner_id,
+        image_url,
         owner_profile:profiles!listings_owner_id_fkey (
           firstname,
           lastname,

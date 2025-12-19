@@ -119,6 +119,7 @@ export default async function ProfilePage() {
                     location={b.listing.location}
                     startDate={b.start_date}
                     endDate={b.end_date}
+                    imageUrl={b.listing.image_url}
                   />
                 ) : (
                   <p>Listing deleted</p>
