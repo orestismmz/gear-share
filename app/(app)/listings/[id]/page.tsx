@@ -1,8 +1,9 @@
 import { getListingById } from "@/app/actions/listings";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import BookingSection from "@/app/components/BookingSection";
-import { User } from "lucide-react";
+import { User, ImageIcon } from "lucide-react";
 
 interface ListingPageProps {
   params: Promise<{
@@ -21,6 +22,19 @@ export default async function ListingPage({ params }: ListingPageProps) {
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <div className="bg-white rounded-lg p-8">
+        <div className="relative w-full h-96 mb-6 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+          {listing.image_url ? (
+            <Image
+              src={listing.image_url}
+              alt={listing.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <ImageIcon size={128} className="text-gray-400" />
+          )}
+        </div>
+
         <h1 className="text-3xl font-bold mb-6">{listing.title}</h1>
 
         {listing.description && (

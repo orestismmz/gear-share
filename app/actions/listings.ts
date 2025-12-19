@@ -4,15 +4,6 @@ import { createClient } from "@/app/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export type CreateListingInput = {
-  title: string;
-  description?: string;
-  price_per_day: number;
-  condition: "new" | "like_new" | "good" | "fair" | "poor";
-  location: "amagerbro" | "østerbro" | "nørrebro" | "vesterbro";
-  category: "diy" | "sports" | "outdoor" | "photography" | "music";
-};
-
 export type Listing = {
   id: string;
   owner_id: string;
@@ -22,13 +13,14 @@ export type Listing = {
   condition: string;
   location: string;
   category: string;
+  image_url: string | null;
   created_at: string;
   profiles?: {
     username: string;
   };
 };
 
-export async function createListing(input: CreateListingInput) {
+export async function createListing(formData: FormData) {
   const supabase = await createClient();
 
   // Get the current user
@@ -41,23 +33,76 @@ export async function createListing(input: CreateListingInput) {
     return { error: "You must be authenticated to create a listing" };
   }
 
-  // Insert the listing
-  const { data, error } = await supabase
+  // Extract form data
+  const title = formData.get("title") as string;
+  const description = (formData.get("description") as string) || null;
+  const price_per_day = parseFloat(formData.get("price_per_day") as string);
+  const condition = formData.get("condition") as string;
+  const location = formData.get("location") as string;
+  const category = formData.get("category") as string;
+  const imageFile = formData.get("image") as File;
+
+  // Validate required fields
+  if (!title || !price_per_day || !condition || !location || !category) {
+    return { error: "Missing required fields" };
+  }
+
+  if (!imageFile || imageFile.size === 0) {
+    return { error: "Image is required" };
+  }
+
+  // Insert the listing first (without image_url)
+  const { data: listing, error: listingError } = await supabase
     .from("listings")
     .insert({
       owner_id: user.id,
-      title: input.title,
-      description: input.description,
-      price_per_day: input.price_per_day,
-      condition: input.condition,
-      location: input.location,
-      category: input.category,
+      title,
+      description,
+      price_per_day,
+      condition,
+      location,
+      category,
     })
     .select()
     .single();
 
-  if (error) {
-    return { error: error.message };
+  if (listingError) {
+    return { error: listingError.message };
+  }
+
+  // Upload image to storage with path: {user_id}/{listing_id}/{filename}
+  const fileExt = imageFile.name.split(".").pop();
+  const fileName = `${Date.now()}.${fileExt}`;
+  const filePath = `${user.id}/${listing.id}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("listing_images")
+    .upload(filePath, imageFile, {
+      contentType: imageFile.type,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    // If upload fails, delete the listing
+    await supabase.from("listings").delete().eq("id", listing.id);
+    return { error: `Failed to upload image: ${uploadError.message}` };
+  }
+
+  // Get the public URL for the uploaded image
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("listing_images").getPublicUrl(filePath);
+
+  // Update the listing with the image URL
+  const { error: updateError } = await supabase
+    .from("listings")
+    .update({ image_url: publicUrl })
+    .eq("id", listing.id);
+
+  if (updateError) {
+    return {
+      error: `Failed to update listing with image: ${updateError.message}`,
+    };
   }
 
   // Revalidate and redirect to profile or listings page

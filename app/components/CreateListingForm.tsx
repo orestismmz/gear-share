@@ -1,39 +1,45 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { createListing, CreateListingInput } from '@/app/actions/listings'
-import Button from '@/app/components/ui/Button'
+import { useState } from "react";
+import { createListing } from "@/app/actions/listings";
+import Button from "@/app/components/ui/Button";
+import Image from "next/image";
 
 export default function CreateListingForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
-    const formData = new FormData(e.currentTarget)
-    
-    const input: CreateListingInput = {
-      title: formData.get('title') as string,
-      description: formData.get('description') as string || undefined,
-      price_per_day: parseFloat(formData.get('price_per_day') as string),
-      condition: formData.get('condition') as CreateListingInput['condition'],
-      location: formData.get('location') as CreateListingInput['location'],
-      category: formData.get('category') as CreateListingInput['category'],
-    }
+    const formData = new FormData(e.currentTarget);
 
     try {
-      const result = await createListing(input)
+      const result = await createListing(formData);
       if (result?.error) {
-        setError(result.error)
-        setIsSubmitting(false)
+        setError(result.error);
+        setIsSubmitting(false);
       }
       // If successful, the server action will redirect
     } catch (err) {
-      setError('An unexpected error occurred')
-      setIsSubmitting(false)
+      setError("An unexpected error occurred");
+      setIsSubmitting(false);
     }
   }
 
@@ -60,6 +66,31 @@ export default function CreateListingForm() {
       </div>
 
       <div>
+        <label htmlFor="image" className="block text-sm font-medium mb-2">
+          Image *
+        </label>
+        <input
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          required
+          onChange={handleImageChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        {imagePreview && (
+          <div className="mt-4 relative w-full h-64 rounded-lg overflow-hidden">
+            <Image
+              src={imagePreview}
+              alt="Preview"
+              fill
+              className="object-cover"
+            />
+          </div>
+        )}
+      </div>
+
+      <div>
         <label htmlFor="description" className="block text-sm font-medium mb-2">
           Description
         </label>
@@ -73,7 +104,10 @@ export default function CreateListingForm() {
       </div>
 
       <div>
-        <label htmlFor="price_per_day" className="block text-sm font-medium mb-2">
+        <label
+          htmlFor="price_per_day"
+          className="block text-sm font-medium mb-2"
+        >
           Price per day (DKK) *
         </label>
         <input
@@ -145,16 +179,10 @@ export default function CreateListingForm() {
       </div>
 
       <div className="flex gap-4">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex-1"
-        >
-          {isSubmitting ? 'Creating...' : 'Create Listing'}
+        <Button type="submit" disabled={isSubmitting} className="flex-1">
+          {isSubmitting ? "Creating..." : "Create Listing"}
         </Button>
-
       </div>
     </form>
-  )
+  );
 }
-

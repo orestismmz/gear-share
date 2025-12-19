@@ -4,7 +4,7 @@ import ListingCard from "@/app/components/ui/ListingCard";
 import { getAllListings } from "@/app/actions/listings";
 
 export default async function Home() {
-  const listings = await getAllListings()
+  const listings = await getAllListings();
 
   return (
     <div>
@@ -14,7 +14,7 @@ export default async function Home() {
       </header>
       <main>
         <h1 className="text-4xl font-bold mb-8">Browse Gear</h1>
-        
+
         {listings.length === 0 ? (
           <p className="text-gray-600 text-center py-12">
             No listings available yet. Be the first to share your gear!
@@ -28,11 +28,12 @@ export default async function Home() {
                 title={listing.title}
                 price_per_day={listing.price_per_day}
                 location={listing.location}
+                image_url={listing.image_url}
               />
             ))}
           </div>
         )}
       </main>
-    </div>  
+    </div>
   );
 }

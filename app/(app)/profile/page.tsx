@@ -93,6 +93,7 @@ export default async function ProfilePage() {
                 title={listing.title}
                 price_per_day={listing.price_per_day}
                 location={listing.location}
+                image_url={listing.image_url}
               />
             ))}
           </div>
