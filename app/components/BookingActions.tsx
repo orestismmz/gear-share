@@ -8,6 +8,7 @@ import {
   declineBooking,
   cancelBooking,
   deletePendingBooking,
+  removeBookingFromList,
   BookingStatus,
 } from "@/app/actions/bookings";
 
@@ -46,6 +47,9 @@ export default function BookingActions({
       (isOwner && status === "approved"));
 
   const isPendingBorrowerRequest = isBorrower && status === "pending";
+
+  // Remove from list logic: cancelled or declined bookings
+  const canRemoveFromList = status === "cancelled" || status === "declined";
 
   const handleApprove = async () => {
     setIsLoading(true);
@@ -113,8 +117,30 @@ export default function BookingActions({
     }
   };
 
+  const handleRemoveFromList = async () => {
+    if (
+      !confirm("Are you sure you want to remove this booking from your list?")
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const result = await removeBookingFromList(bookingId);
+
+    setIsLoading(false);
+
+    if (result.error) {
+      setError(result.error);
+    } else {
+      // Redirect to profile after removing
+      router.push("/profile");
+    }
+  };
+
   // Don't show anything if no actions are available
-  if (!canApprove && !canDecline && !canCancelOrDelete) {
+  if (!canApprove && !canDecline && !canCancelOrDelete && !canRemoveFromList) {
     return null;
   }
 
@@ -154,6 +180,16 @@ export default function BookingActions({
               : isPendingBorrowerRequest
                 ? "Cancel Request"
                 : "Cancel Booking"}
+          </Button>
+        )}
+
+        {canRemoveFromList && (
+          <Button
+            onClick={handleRemoveFromList}
+            disabled={isLoading}
+            className="bg-orange-600 hover:bg-orange-700"
+          >
+            {isLoading ? "Removing..." : "Remove from List"}
           </Button>
         )}
       </div>

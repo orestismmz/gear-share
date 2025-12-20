@@ -26,8 +26,8 @@ export type Booking = {
   price_per_day_at_booking: number;
   total_price: number;
   created_at: string;
-  owner_deleted: boolean;
-  borrower_deleted: boolean;
+  owner_removed: boolean;
+  borrower_removed: boolean;
 };
 
 export type BookingWithListingInfo = {
@@ -38,6 +38,8 @@ export type BookingWithListingInfo = {
   price_per_day_at_booking: number;
   total_price: number;
   created_at: string;
+  owner_removed: boolean;
+  borrower_removed: boolean;
   listing: {
     id: string;
     title: string;
@@ -57,6 +59,8 @@ export type BookingWithListingAndProfileInfo = {
   price_per_day_at_booking: number;
   total_price: number;
   created_at: string;
+  owner_removed: boolean;
+  borrower_removed: boolean;
   borrower_profile: {
     firstname: string;
     lastname: string;
@@ -120,8 +124,8 @@ export async function createBooking(input: CreateBookingInput) {
       status: "pending",
       price_per_day_at_booking: listing.price_per_day,
       total_price: totalPrice,
-      owner_deleted: false,
-      borrower_deleted: false,
+      owner_removed: false,
+      borrower_removed: false,
     })
     .select()
     .single();
@@ -266,6 +270,8 @@ export async function getBookingsOnMyListings(): Promise<
       price_per_day_at_booking,
       total_price,
       created_at,
+      owner_removed,
+      borrower_removed,
       listing:listings!bookings_listing_id_fkey (
         id,
         title,
@@ -283,12 +289,14 @@ export async function getBookingsOnMyListings(): Promise<
     return [];
   }
 
-  // Filter for listings owned by the current user
+  // Filter for listings owned by the current user and not removed by owner
   const bookingsForMyListings = (data ?? []).filter((booking) => {
     const listing = Array.isArray(booking.listing)
       ? booking.listing[0]
       : booking.listing;
-    return listing && listing.owner_id === user.id;
+    return (
+      listing && listing.owner_id === user.id && booking.owner_removed === false
+    );
   });
 
   // Transform the data to match our type
@@ -452,6 +460,72 @@ export async function getPendingBookingForListing(
   return data;
 }
 
+export async function removeBookingFromList(bookingId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "You must be authenticated to remove a booking" };
+  }
+
+  // First, get the booking to check if user is owner or borrower
+  const { data: booking, error: fetchError } = await supabase
+    .from("bookings")
+    .select("borrower_id, listing:listings!bookings_listing_id_fkey(owner_id)")
+    .eq("id", bookingId)
+    .single();
+
+  if (fetchError || !booking) {
+    return { error: "Booking not found" };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const listing: any = Array.isArray(booking.listing)
+    ? booking.listing[0]
+    : booking.listing;
+
+  const isOwner = listing && listing.owner_id === user.id;
+  const isBorrower = booking.borrower_id === user.id;
+
+  // console.log("booking id:", bookingId);
+  // console.log("user id:", user.id);
+  // console.log("is owner:", isOwner);
+  // console.log("is borrower:", isBorrower);
+  // console.log("booking data:", booking);
+
+  if (!isOwner && !isBorrower) {
+    return { error: "You don't have permission to remove this booking" };
+  }
+
+  // Update the appropriate field
+  const updateData = isOwner
+    ? { owner_removed: true }
+    : { borrower_removed: true };
+
+  console.log("Update data to be sent:", updateData);
+
+  const { error } = await supabase
+    .from("bookings")
+    .update(updateData)
+    .eq("id", bookingId);
+
+  if (error) {
+    console.error("Error removing booking from list:", error);
+    console.log("Full error object:", JSON.stringify(error, null, 2));
+    return { error: error.message };
+  }
+
+  console.log("booking removed");
+
+  revalidatePath("/profile");
+
+  return { error: null };
+}
+
 export async function getMyBookingsWithListingInfo(): Promise<
   BookingWithListingInfo[]
 > {
@@ -475,6 +549,8 @@ export async function getMyBookingsWithListingInfo(): Promise<
       price_per_day_at_booking,
       total_price,
       created_at,
+      owner_removed,
+      borrower_removed,
       listing:listings!bookings_listing_id_fkey (
         id,
         title,
@@ -486,6 +562,7 @@ export async function getMyBookingsWithListingInfo(): Promise<
     `
     )
     .eq("borrower_id", user.id)
+    .eq("borrower_removed", false)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -528,6 +605,8 @@ export async function getBookingById(
       price_per_day_at_booking,
       total_price,
       created_at,
+      owner_removed,
+      borrower_removed,
       borrower_profile:profiles!bookings_borrower_id_fkey (
         firstname,
         lastname,
@@ -586,6 +665,8 @@ export async function getBookingById(
     price_per_day_at_booking: data.price_per_day_at_booking,
     total_price: data.total_price,
     created_at: data.created_at,
+    owner_removed: data.owner_removed,
+    borrower_removed: data.borrower_removed,
     borrower_profile: borrowerProfile,
     listing,
   } as BookingWithListingAndProfileInfo;
