@@ -8,6 +8,7 @@ interface ListingCardProps {
   price_per_day: number;
   location: string;
   image_url?: string | null;
+  isOwner?: boolean;
 }
 
 export default function ListingCard({
@@ -16,9 +17,12 @@ export default function ListingCard({
   price_per_day,
   location,
   image_url,
+  isOwner = false,
 }: ListingCardProps) {
+  const href = isOwner ? `/listings/${id}/edit` : `/listings/${id}`;
+
   return (
-    <Link href={`/listings/${id}`}>
+    <Link href={href}>
       <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
         <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
           {image_url ? (

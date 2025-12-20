@@ -181,3 +181,59 @@ export async function getListingsByUsername(
 
   return data || [];
 }
+
+export async function deleteListing(listingId: string) {
+  const supabase = await createClient();
+
+  // Get the current user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "You must be authenticated to delete a listing" };
+  }
+
+  // First, get the listing to verify ownership and get image URL
+  const { data: listing, error: fetchError } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("id", listingId)
+    .single();
+
+  if (fetchError) {
+    return { error: "Listing not found" };
+  }
+
+  // Check if the user is the owner
+  if (listing.owner_id !== user.id) {
+    return { error: "You are not authorized to delete this listing" };
+  }
+
+  // Delete associated images from storage
+  if (listing.image_url) {
+    const filePath = `${user.id}/${listing.id}`;
+    const { error: deleteFilesError } = await supabase.storage
+      .from("listing_images")
+      .remove([filePath]);
+
+    if (deleteFilesError) {
+      console.error("Error deleting images:", deleteFilesError);
+      // Continue with listing deletion even if file deletion fails
+    }
+  }
+
+  // Delete the listing
+  const { error: deleteError } = await supabase
+    .from("listings")
+    .delete()
+    .eq("id", listingId);
+
+  if (deleteError) {
+    return { error: `Failed to delete listing: ${deleteError.message}` };
+  }
+
+  revalidatePath("/profile");
+  redirect("/profile");
+}
