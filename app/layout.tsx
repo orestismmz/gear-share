@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import QueryProvider from "./providers/QueryProvider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -21,9 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
-        <div className="grid grid-cols-[5%_1fr_5%] min-h-screen pb-10">
-          <div className="col-start-2">{children}</div>
-        </div>
+        <QueryProvider>
+          <div className="grid grid-cols-[5%_1fr_5%] min-h-screen pb-10">
+            <div className="col-start-2">{children}</div>
+          </div>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -140,8 +140,7 @@ export async function createBooking(input: CreateBookingInput) {
     return { error: error.message };
   }
 
-  // Revalidate the listing page
-  revalidatePath(`/listings/${input.listing_id}`);
+  // Note: revalidatePath removed - Tanstack Query handles client-side state management
 
   return { data, error: null };
 }
