@@ -1,10 +1,11 @@
-import { getBookingById, BookingStatus } from "@/app/actions/bookings";
+import { getBookingById } from "@/app/actions/bookings";
 import { redirect } from "next/navigation";
 import { MapPin, User, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/app/lib/supabase/server";
-import BookingActions from "@/app/components/BookingActions";
+import BookingActionsClient from "@/app/components/BookingActionsClient";
+import BookingStatusBannerClient from "@/app/components/BookingStatusBannerClient";
 
 function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -12,23 +13,6 @@ function capitalizeFirstLetter(str: string): string {
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString("en-GB");
-}
-
-function getStatusStyles(status: BookingStatus) {
-  switch (status) {
-    case "approved":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "pending":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "declined":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "cancelled":
-      return "bg-gray-100 text-gray-800 border-gray-200";
-    case "completed":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
 }
 
 export default async function BookingDetailPage({
@@ -84,19 +68,13 @@ export default async function BookingDetailPage({
         </p>
       </div>
 
-      <div
-        className={`mb-6 p-4 rounded-lg border-2 ${getStatusStyles(booking.status)}`}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold uppercase">Status:</span>
-          <span className="text-lg font-bold uppercase">{booking.status}</span>
-        </div>
-      </div>
-
-      <BookingActions
+      <BookingStatusBannerClient
         bookingId={booking.id}
-        status={booking.status}
-        startDate={booking.start_date}
+        initialStatus={booking.status}
+      />
+
+      <BookingActionsClient
+        bookingId={booking.id}
         isOwner={isOwner}
         isBorrower={isBorrower}
       />
