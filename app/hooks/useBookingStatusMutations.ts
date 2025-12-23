@@ -11,11 +11,20 @@ import {
 } from "@/app/actions/bookings";
 
 export function useBookingStatusMutations(bookingId: string) {
-  const qc = useQueryClient();
+  const queryClient = useQueryClient();
   const key = ["booking", bookingId] as const;
 
+  const invalidateListingBookingQueries = (listingId?: string | null) => {
+    if (!listingId) return;
+    // These two queries drive the listing page booking UI.
+    queryClient.invalidateQueries({ queryKey: ["pendingBooking", listingId] });
+    queryClient.invalidateQueries({
+      queryKey: ["approvedBookings", listingId],
+    });
+  };
+
   const setStatus = (status: BookingStatus) => {
-    qc.setQueryData(key, (old: any) => {
+    queryClient.setQueryData(key, (old: any) => {
       // If old isn't there yet, create minimal shape so banner can update
       if (!old) return { id: bookingId, status };
       return { ...old, status };
@@ -29,16 +38,17 @@ export function useBookingStatusMutations(bookingId: string) {
       return res.data;
     },
     onMutate: async () => {
-      await qc.cancelQueries({ queryKey: key });
-      const previous = qc.getQueryData(key);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
       setStatus("approved");
       return { previous };
     },
     onError: (_err, _vars, ctx) => {
-      qc.setQueryData(key, ctx?.previous);
+      queryClient.setQueryData(key, ctx?.previous);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: key });
+    onSettled: (data) => {
+      queryClient.invalidateQueries({ queryKey: key });
+      invalidateListingBookingQueries((data as any)?.listing_id);
     },
   });
 
@@ -49,16 +59,17 @@ export function useBookingStatusMutations(bookingId: string) {
       return res.data;
     },
     onMutate: async () => {
-      await qc.cancelQueries({ queryKey: key });
-      const previous = qc.getQueryData(key);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
       setStatus("declined");
       return { previous };
     },
     onError: (_err, _vars, ctx) => {
-      qc.setQueryData(key, ctx?.previous);
+      queryClient.setQueryData(key, ctx?.previous);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: key });
+    onSettled: (data) => {
+      queryClient.invalidateQueries({ queryKey: key });
+      invalidateListingBookingQueries((data as any)?.listing_id);
     },
   });
 
@@ -69,16 +80,17 @@ export function useBookingStatusMutations(bookingId: string) {
       return res.data;
     },
     onMutate: async () => {
-      await qc.cancelQueries({ queryKey: key });
-      const previous = qc.getQueryData(key);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
       setStatus("cancelled");
       return { previous };
     },
     onError: (_err, _vars, ctx) => {
-      qc.setQueryData(key, ctx?.previous);
+      queryClient.setQueryData(key, ctx?.previous);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: key });
+    onSettled: (data) => {
+      queryClient.invalidateQueries({ queryKey: key });
+      invalidateListingBookingQueries((data as any)?.listing_id);
     },
   });
 
@@ -88,16 +100,18 @@ export function useBookingStatusMutations(bookingId: string) {
       if (res.error) throw new Error(res.error);
     },
     onMutate: async () => {
-      await qc.cancelQueries({ queryKey: key });
-      const previous = qc.getQueryData(key);
-      qc.setQueryData(key, null);
-      return { previous };
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
+      const listingIdFromPrevious = (previous as any)?.listing?.id ?? null;
+      queryClient.setQueryData(key, null);
+      return { previous, listingIdFromPrevious };
     },
     onError: (_err, _vars, ctx) => {
-      qc.setQueryData(key, ctx?.previous);
+      queryClient.setQueryData(key, ctx?.previous);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: key });
+    onSettled: (_data, _error, _vars, ctx) => {
+      queryClient.invalidateQueries({ queryKey: key });
+      invalidateListingBookingQueries((ctx as any)?.listingIdFromPrevious);
     },
   });
 

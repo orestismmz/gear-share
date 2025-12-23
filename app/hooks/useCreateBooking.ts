@@ -11,8 +11,18 @@ type MutationContext = {
   previous: unknown;
 };
 
-export function useCreateBooking(listingId: string) {
+export function useCreateBooking(
+  listingId: string,
+  userId: string | null,
+  sessionVersion: string
+) {
   const queryClient = useQueryClient();
+  const pendingKey = [
+    "pendingBooking",
+    listingId,
+    userId,
+    sessionVersion,
+  ] as const;
 
   return useMutation<Booking, Error, CreateBookingInput, MutationContext>({
     mutationFn: async (input) => {
@@ -24,13 +34,14 @@ export function useCreateBooking(listingId: string) {
 
     // Optional: optimistic UI (so button switches instantly)
     onMutate: async (input) => {
-      await queryClient.cancelQueries({
-        queryKey: ["pendingBooking", listingId],
-      });
+      // If userId isn't ready yet, skip optimistic cache work.
+      if (!userId) return { previous: undefined };
 
-      const previous = queryClient.getQueryData(["pendingBooking", listingId]);
+      await queryClient.cancelQueries({ queryKey: pendingKey });
 
-      queryClient.setQueryData(["pendingBooking", listingId], {
+      const previous = queryClient.getQueryData(pendingKey);
+
+      queryClient.setQueryData(pendingKey, {
         id: "__optimistic__",
         start_date: input.start_date,
         end_date: input.end_date,
@@ -40,16 +51,15 @@ export function useCreateBooking(listingId: string) {
     },
 
     onError: (_err, _input, ctx) => {
+      if (!userId) return;
       // rollback optimistic
-      queryClient.setQueryData(
-        ["pendingBooking", listingId],
-        ctx?.previous ?? null
-      );
+      queryClient.setQueryData(pendingKey, ctx?.previous ?? null);
     },
 
     onSuccess: (booking) => {
+      if (!userId) return;
       // replace optimistic with real booking data
-      queryClient.setQueryData(["pendingBooking", listingId], {
+      queryClient.setQueryData(pendingKey, {
         id: booking.id,
         start_date: booking.start_date,
         end_date: booking.end_date,
@@ -58,6 +68,7 @@ export function useCreateBooking(listingId: string) {
 
     onSettled: () => {
       // ensure server is the final truth
+      // Use prefix so it matches any userId-suffixed key.
       queryClient.invalidateQueries({
         queryKey: ["pendingBooking", listingId],
       });

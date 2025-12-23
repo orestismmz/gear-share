@@ -1,4 +1,5 @@
 import { getListingById } from "@/app/actions/listings";
+import { getAuthContext } from "@/app/actions/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,6 +15,7 @@ interface ListingPageProps {
 export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params;
   const listing = await getListingById(id);
+  const auth = await getAuthContext();
 
   if (!listing) {
     notFound();
@@ -101,7 +103,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
               </p>
             </div>
           </div>
-          <BookingSection listingId={listing.id} />
+          <BookingSection
+            listingId={listing.id}
+            userId={auth.userId}
+            sessionVersion={auth.sessionVersion}
+          />
         </div>
       </div>
     </div>

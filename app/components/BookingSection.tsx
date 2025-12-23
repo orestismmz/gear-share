@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { DateRange } from "react-day-picker";
 import DateRangePicker from "./ui/DateRangePicker";
 import Button from "./ui/Button";
@@ -14,17 +14,36 @@ import { useDeletePendingBooking } from "@/app/hooks/useDeletePendingBooking";
 
 interface BookingSectionProps {
   listingId: string;
+  userId: string | null;
+  sessionVersion: string;
 }
 
-export default function BookingSection({ listingId }: BookingSectionProps) {
+export default function BookingSection({
+  listingId,
+  userId,
+  sessionVersion,
+}: BookingSectionProps) {
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [error, setError] = useState<string | null>(null);
+  const selectedRangeCameFromPendingRef = useRef(false);
 
   const { data: approvedBookings = [] } = useApprovedBookings(listingId);
-  const { data: pendingBooking } = usePendingBooking(listingId);
+  const { data: pendingBooking } = usePendingBooking(
+    listingId,
+    userId,
+    sessionVersion
+  );
 
-  const createBookingMutation = useCreateBooking(listingId);
-  const deletePendingMutation = useDeletePendingBooking(listingId);
+  const createBookingMutation = useCreateBooking(
+    listingId,
+    userId,
+    sessionVersion
+  );
+  const deletePendingMutation = useDeletePendingBooking(
+    listingId,
+    userId,
+    sessionVersion
+  );
 
   // Build disabled dates from approved bookings + past dates
   const disabledDates = useMemo(() => {
@@ -45,16 +64,26 @@ export default function BookingSection({ listingId }: BookingSectionProps) {
 
   // If there is a pending booking, pre-select its range
   useEffect(() => {
-    if (!pendingBooking) return;
+    if (pendingBooking) {
+      setSelectedRange({
+        from: new Date(pendingBooking.start_date),
+        to: new Date(pendingBooking.end_date),
+      });
+      selectedRangeCameFromPendingRef.current = true;
+      return;
+    }
 
-    setSelectedRange({
-      from: new Date(pendingBooking.start_date),
-      to: new Date(pendingBooking.end_date),
-    });
+    // If pending booking disappeared (e.g. owner approved/declined),
+    // clear the preselected range so the user must choose a new range.
+    if (selectedRangeCameFromPendingRef.current) {
+      setSelectedRange(undefined);
+      selectedRangeCameFromPendingRef.current = false;
+    }
   }, [pendingBooking]);
 
   const handleDateSelect = (range: DateRange | undefined) => {
     if (pendingBooking) return; // lock if pending exists
+    selectedRangeCameFromPendingRef.current = false;
     setSelectedRange(range);
     setError(null);
   };
