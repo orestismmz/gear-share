@@ -126,6 +126,27 @@ export async function getAllListings(): Promise<Listing[]> {
   return data || [];
 }
 
+export async function searchListings(searchQuery: string): Promise<Listing[]> {
+  const supabase = await createClient();
+
+  if (!searchQuery.trim()) {
+    return getAllListings();
+  }
+
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .ilike("title", `%${searchQuery.trim()}%`)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error searching listings:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
 export async function getListingById(id: string): Promise<Listing | null> {
   const supabase = await createClient();
 

@@ -1,6 +1,6 @@
 import { getListingsByUsername } from "@/app/actions/listings";
 import { getProfileByUsername } from "@/app/actions/profiles";
-import ListingCard from "@/app/components/ui/ListingCard";
+import ListingCard from "@/app/components/ListingCard";
 import { notFound } from "next/navigation";
 import { User } from "lucide-react";
 

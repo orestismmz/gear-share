@@ -8,8 +8,8 @@ import {
   getMyBookingsWithListingInfo,
   getBookingsOnMyListings,
 } from "@/app/actions/bookings";
-import ListingCard from "@/app/components/ui/ListingCard";
-import BookingCard from "@/app/components/ui/BookingCard";
+import ListingCard from "@/app/components/ListingCard";
+import BookingCard from "@/app/components/BookingCard";
 import { User } from "lucide-react";
 
 function capitalizeFirstLetter(str: string): string {
