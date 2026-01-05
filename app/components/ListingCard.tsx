@@ -7,6 +7,7 @@ interface ListingCardProps {
   title: string;
   price_per_day: number;
   location: string;
+  condition: string;
   image_url?: string | null;
   isOwner?: boolean;
 }
@@ -16,6 +17,7 @@ export default function ListingCard({
   title,
   price_per_day,
   location,
+  condition,
   image_url,
   isOwner = false,
 }: ListingCardProps) {
@@ -39,6 +41,10 @@ export default function ListingCard({
             </p>
             <p className="text-sm text-gray-600 capitalize">{location}</p>
           </div>
+          <p className="text-sm text-gray-500 mt-2">
+            Condition:{" "}
+            <span className="capitalize">{condition.replace("_", " ")}</span>
+          </p>
         </div>
       </div>
     </Link>

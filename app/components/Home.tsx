@@ -43,6 +43,7 @@ export default function Home({
                 title={listing.title}
                 price_per_day={listing.price_per_day}
                 location={listing.location}
+                condition={listing.condition}
                 image_url={listing.image_url}
                 isOwner={currentUserId === listing.owner_id}
               />
