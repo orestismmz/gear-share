@@ -164,25 +164,48 @@ export async function getBookingsByListingId(
   return data || [];
 }
 
+// export async function getApprovedBookingsByListingId(
+//   listingId: string
+// ): Promise<Booking[]> {
+//   const supabase = await createClient();
+
+//   const { data, error } = await supabase
+//     .from("bookings")
+//     .select("*")
+//     .eq("listing_id", listingId)
+//     .in("status", ["approved", "completed"])
+//     .order("start_date", { ascending: true });
+
+//   if (error) {
+//     console.error("Error fetching approved bookings:", error);
+//     return [];
+//   }
+
+//   return data || [];
+// }
+
 export async function getApprovedBookingsByListingId(
   listingId: string
-): Promise<Booking[]> {
+): Promise<Array<{ start_date: string; end_date: string }>> {
   const supabase = await createClient();
 
+  // Query the availability view (recommended)
   const { data, error } = await supabase
-    .from("bookings")
-    .select("*")
+    .from("bookings_availability_view")
+    .select("start_date, end_date")
     .eq("listing_id", listingId)
-    .in("status", ["approved", "completed"])
     .order("start_date", { ascending: true });
 
   if (error) {
-    console.error("Error fetching approved bookings:", error);
+    // If you see RLS/permission errors here for random users,
+    // it means the view is still blocked by the base table's RLS.
+    console.error("Error fetching availability:", error);
     return [];
   }
 
-  return data || [];
+  return data ?? [];
 }
+
 
 export async function getIncomingBookingRequests(): Promise<
   BookingWithListingInfo[]

@@ -33,9 +33,9 @@ export default function BookingStatusBannerClient({
   const status = booking?.status ?? initialStatus;
 
   return (
-    <div className={`mb-6 p-4 rounded-lg border-2 ${getStatusStyles(status)}`}>
+    <div className={`px-6 rounded-lg border-2 ${getStatusStyles(status)}`}>
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold uppercase">Status:</span>
+        {/* <span className="text-sm font-semibold uppercase">Status:</span> */}
         <span className="text-lg font-bold uppercase">{status}</span>
       </div>
     </div>

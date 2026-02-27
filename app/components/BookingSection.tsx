@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useEffect, useRef, useState } from "react";
-import { DateRange } from "react-day-picker";
+import { DateRange, Matcher } from "react-day-picker";
 import DateRangePicker from "./ui/DateRangePicker";
 import Button from "./ui/Button";
 import { eachDayOfInterval, parseISO, format } from "date-fns";
@@ -47,7 +47,7 @@ export default function BookingSection({
 
   // Build disabled dates from approved bookings + past dates
   const disabledDates = useMemo(() => {
-    const disabled: Date[] = [];
+    const disabled: Matcher[] = [];
 
     approvedBookings.forEach((booking) => {
       const start = parseISO(booking.start_date);
@@ -57,7 +57,7 @@ export default function BookingSection({
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    disabled.push({ before: today } as any);
+    disabled.push({ before: today });
 
     return disabled;
   }, [approvedBookings]);

@@ -1,12 +1,12 @@
 "use client";
 
-import { DayPicker, DateRange } from "react-day-picker";
+import { DayPicker, DateRange, Matcher } from "react-day-picker";
 // import 'react-day-picker/style.css'
 
 interface DateRangePickerProps {
   selected?: DateRange;
   onSelect?: (range: DateRange | undefined) => void;
-  disabled?: Date | Date[];
+  disabled?: Matcher | Matcher[];
 }
 
 export default function DateRangePicker({

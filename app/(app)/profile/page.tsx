@@ -83,7 +83,7 @@ export default async function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-semibold ">Your Listings</h2>
+        <h2 className="text-2xl font-semibold text-primary">Your Listings</h2>
 
         {listings.length === 0 ? (
           <p className="text-gray-600 text-left">
@@ -109,7 +109,7 @@ export default async function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-semibold">Bookings on Your Listings</h2>
+        <h2 className="text-2xl font-semibold text-primary">Bookings on Your Listings</h2>
 
         {bookingsOnMyListings.length === 0 ? (
           <p className="text-gray-600 text-left">
@@ -140,7 +140,7 @@ export default async function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-6">
-        <h2 className=" text-2xl font-semibold">Your Bookings</h2>
+        <h2 className=" text-2xl font-semibold text-primary">Your Bookings</h2>
 
         {bookings.length === 0 ? (
           <p className="text-gray-600 text-left">

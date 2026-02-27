@@ -58,28 +58,36 @@ export default async function BookingDetailPage({
   const otherUserLabel = isOwner ? "Requested by" : "Listed by";
 
   return (
-    <div className="pt-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Booking Details
-        </h1>
-        <p className="text-sm text-gray-500">
-          Booking ID: <span className="font-mono">{booking.id}</span>
-        </p>
-      </div>
+    <div className="p-4 max-w-4xl mx-auto">
+      <div className="bg-white rounded-lg p-8">
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Booking Details
+          </h1>
+          <p className="text-sm text-gray-500">
+            Booking ID: <span className="font-mono">{booking.id}</span>
+          </p>
+          </div>
+          <div>
+          <BookingStatusBannerClient
+          bookingId={booking.id}
+          initialStatus={booking.status}
+        />
+          </div>
 
-      <BookingStatusBannerClient
-        bookingId={booking.id}
-        initialStatus={booking.status}
-      />
+        </div>
 
-      <BookingActionsClient
-        bookingId={booking.id}
-        isOwner={isOwner}
-        isBorrower={isBorrower}
-      />
+        <div className="mb-8 flex justify-end">
+        <BookingActionsClient
+          bookingId={booking.id}
+          isOwner={isOwner}
+          isBorrower={isBorrower}
+        />
+        </div>
 
-      <div className="mb-8 p-6 flex flex-col gap-10 bg-gray-50 rounded-lg border border-gray-200">
+
+        <div className="mb-8 p-6 flex flex-col gap-10 bg-gray-50 rounded-lg border border-gray-200">
         <div className="relative w-full h-64 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
           {booking.listing.image_url ? (
             <Image
@@ -151,6 +159,7 @@ export default async function BookingDetailPage({
             </div>
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );
